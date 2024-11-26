@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+    <style>
+        #role-message {
+            color: red; /* Default to red for error messages */
+        }
+        #role-message.success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required />
+            <input type="password" id="password" placeholder="Password" required />
+            <button type="submit">Login</button>
+        </form>
+        <p>New user? <a href="register.html">Create an account</a></p>
+
+        <div id="role-message"></div>
+
+        <script>
+            document.getElementById("login-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const username = document.getElementById("username").value;
+                const password = document.getElementById("password").value;
+
+                try {
+                    const response = await fetch("http://localhost:5000/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+
+                        // Pass role and username to profile.html via localStorage
+                        localStorage.setItem("role", result.role);
+                        localStorage.setItem("username", username);
+
+                        document.getElementById("role-message").textContent = "Login successful! Redirecting...";
+                        document.getElementById("role-message").classList.add("success");
+
+                        window.location.href = "profile.html";
+                    } else {
+                        const error = await response.json();
+                        document.getElementById("role-message").textContent = error.message || "Login failed. Please try again.";
+                    }
+                } catch (error) {
+                    console.error("Error during fetch:", error);
+                    document.getElementById("role-message").textContent = "An unexpected error occurred. Please try again later.";
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
